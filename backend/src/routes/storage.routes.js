@@ -1,64 +1,74 @@
-import { Router } from 'express';
+import express from 'express';
 import multer from 'multer';
+import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { sql } from '../config/db.js';
+import { s3Client, BUCKET_NAME } from '../config/storage.js';
 
-const router = Router();
-
+const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 2 * 1024 * 1024 } // Máximo 2 MB por imagen
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-// POST /api/imagenes -> Guarda la imagen en Neon
+// POST /api/imagenes - Subir archivo al bucket S3 de Neon y registrar ID en PostgreSQL
 router.post('/', upload.single('imagen'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No se envió ningún archivo de imagen' });
+      return res.status(400).json({ error: 'No se envió ninguna imagen' });
     }
 
-    const userId = req.headers['x-user-id'] ? Number(req.headers['x-user-id']) : null;
-    const base64 = req.file.buffer.toString('base64');
+    const key = `${Date.now()}-${req.file.originalname.replace(/\s+/g, '_')}`;
 
-    const resultado = await sql`
-      INSERT INTO imagenes_storage (nombre_archivo, mime_type, datos_base64, subido_por)
-      VALUES (${req.file.originalname}, ${req.file.mimetype}, ${base64}, ${userId})
-      RETURNING id, nombre_archivo, mime_type, creado_en
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      })
+    );
+
+    const [registro] = await sql`
+      INSERT INTO imagenes_storage (nombre_archivo, mime_type, datos_base64)
+      VALUES (${key}, ${req.file.mimetype}, ${'S3:' + key})
+      RETURNING id, nombre_archivo, mime_type, creado_en;
     `;
 
-    const img = resultado[0];
     res.status(201).json({
-      mensaje: 'Imagen almacenada en Neon',
-      imagen: {
-        ...img,
-        url: `/api/imagenes/${img.id}`
-      }
+      mensaje: 'Imagen almacenada en el bucket de Neon',
+      imagen: registro,
     });
   } catch (error) {
-    console.error('Error al subir imagen a Neon:', error);
-    res.status(500).json({ error: 'Error al guardar la imagen en Neon' });
+    console.error('Error al subir imagen al bucket S3:', error);
+    res.status(500).json({ error: 'Error al subir la imagen al bucket' });
   }
 });
 
-// GET /api/imagenes/:id -> Sirve la imagen directamente desde Neon
+// GET /api/imagenes/:id - Descargar imagen desde el bucket S3 de Neon
 router.get('/:id', async (req, res) => {
   try {
-    const filas = await sql`
-      SELECT mime_type, datos_base64
+    const [img] = await sql`
+      SELECT nombre_archivo, mime_type
       FROM imagenes_storage
-      WHERE id = ${Number(req.params.id)}
+      WHERE id = ${req.params.id};
     `;
 
-    if (filas.length === 0) {
+    if (!img) {
       return res.status(404).json({ error: 'Imagen no encontrada' });
     }
 
-    const { mime_type, datos_base64 } = filas[0];
-    const buffer = Buffer.from(datos_base64, 'base64');
-    res.set('Content-Type', mime_type);
-    res.send(buffer);
+    const respuestaS3 = await s3Client.send(
+      new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: img.nombre_archivo,
+      })
+    );
+
+    res.setHeader('Content-Type', img.mime_type);
+    respuestaS3.Body.pipe(res);
   } catch (error) {
-    console.error('Error al leer imagen de Neon:', error);
-    res.status(500).json({ error: 'Error al obtener la imagen' });
+    console.error('Error al obtener imagen desde el bucket S3:', error);
+    res.status(500).json({ error: 'Error al recuperar la imagen del bucket' });
   }
 });
 
