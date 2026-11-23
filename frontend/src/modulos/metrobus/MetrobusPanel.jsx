@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { apiFetch, API_URL } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import BadgeEstado from '../../components/common/BadgeEstado.jsx';
+import PanelHero, { EstadoVacio } from '../../components/common/PanelHero.jsx';
 import SubirImagenNeon from '../../components/common/SubirImagenNeon.jsx';
+
 
 export default function MetrobusPanel() {
   const { obtenerRol } = useAuth();
   const rol = obtenerRol('metrobus');
+
 
   const [registros, setRegistros] = useState([]);
   const [numeroTarjeta, setNumeroTarjeta] = useState('');
@@ -14,6 +17,7 @@ export default function MetrobusPanel() {
   const [imagenId, setImagenId] = useState(null);
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
+
 
   const cargar = async () => {
     try {
@@ -24,9 +28,11 @@ export default function MetrobusPanel() {
     }
   };
 
+
   useEffect(() => {
     cargar();
   }, []);
+
 
   const handleCrear = async (e) => {
     e.preventDefault();
@@ -47,6 +53,7 @@ export default function MetrobusPanel() {
     }
   };
 
+
   const cambiarEstado = async (id, estado) => {
     try {
       await apiFetch(`/api/metrobus/${id}/estado`, {
@@ -59,6 +66,7 @@ export default function MetrobusPanel() {
     }
   };
 
+
   const eliminar = async (id) => {
     try {
       await apiFetch(`/api/metrobus/${id}`, { method: 'DELETE' });
@@ -68,17 +76,26 @@ export default function MetrobusPanel() {
     }
   };
 
+
   return (
     <div>
-      <div className="card">
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#16a34a', fontWeight: 700 }}>
-          MÓDULO METROBUS LIMA · ROL ACTIVO: {rol?.toUpperCase()}
-        </p>
-        <h1 style={{ margin: '0.2rem 0 0', color: '#0f3d24' }}>Gestión de Recargas de Tarjeta</h1>
-      </div>
+      <PanelHero
+        modulo="metrobus"
+        rol={rol}
+        titulo="Gestión de Recargas de Tarjeta"
+        subtitulo="Recarga tu tarjeta MetroBus, adjunta tu comprobante y sigue el estado de cada operación."
+        stats={[
+          { label: 'Recargas', valor: registros.length },
+          { label: 'Pendientes', valor: registros.filter((r) => r.estado === 'registrado').length },
+          { label: 'Pagadas', valor: registros.filter((r) => r.estado === 'pagado').length },
+          { label: 'Monto total', valor: registros.reduce((a, r) => a + Number(r.monto || 0), 0), prefijo: 'S/ ', decimales: 2 },
+        ]}
+      />
+
 
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-error">{error}</div>}
+
 
       {(rol === 'cliente' || rol === 'administrador') && (
         <form onSubmit={handleCrear} className="card">
@@ -114,6 +131,7 @@ export default function MetrobusPanel() {
           <button type="submit" className="btn btn-primary">Guardar recarga</button>
         </form>
       )}
+
 
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Listado de recargas ({registros.length})</h2>
@@ -159,6 +177,9 @@ export default function MetrobusPanel() {
                   )}
                 </tr>
               ))}
+              {registros.length === 0 && (
+                <tr><td colSpan={7}><EstadoVacio texto="Aún no hay recargas registradas" /></td></tr>
+              )}
             </tbody>
           </table>
         </div>
