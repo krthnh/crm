@@ -442,6 +442,7 @@ body {
   border-top: 1px solid #edf2ef;
 }
 
+
 .table tbody tr {
   animation: fadeInRow 0.35s ease-out both;
   transition: background-color 0.2s ease;
@@ -451,8 +452,6 @@ body {
 .table tbody tr:hover {
   background-color: #f6fbf8;
 }
-
-
 .table a {
   color: var(--color-acento-hover);
   font-weight: 600;
@@ -815,4 +814,174 @@ body {
   color: var(--color-acento-hover);
   cursor: pointer;
   text-decoration: underline;
+}
+
+
+/* ==========================================================================
+   PANELES: BANNER ANIMADO, ESTADÍSTICAS E ILUSTRACIONES
+   ========================================================================== */
+@keyframes busRun { from { transform: translateX(-200px); } to { transform: translateX(480px); } }
+@keyframes girar { to { transform: rotate(360deg); } }
+@keyframes flujo { to { stroke-dashoffset: -80; } }
+@keyframes ondas { from { transform: translateX(0); } to { transform: translateX(230px); } }
+@keyframes caer { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(150px); opacity: 0; } }
+@keyframes latido { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes pulsoNodo { 0%, 100% { transform: scale(0.8); opacity: 0.9; } 50% { transform: scale(1.5); opacity: 0.2; } }
+@keyframes volar { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+@keyframes voltear { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.15); } }
+@keyframes brillo { from { transform: translateX(-120%); } to { transform: translateX(220%); } }
+@keyframes aparecer { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
+
+
+.panel-hero {
+  --t1: #072215; --t2: #114b30; --t-acento: #34d399;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.7rem 1.8rem;
+  margin-bottom: 1.4rem;
+  border-radius: 20px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--t-acento) 40%, transparent) 0%, transparent 45%),
+    linear-gradient(135deg, var(--t1) 0%, var(--t2) 100%);
+  box-shadow: 0 18px 40px rgba(7, 34, 21, 0.28);
+  animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.panel-hero::after { /* destello que cruza el banner */
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.10), transparent);
+  animation: brillo 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+.tema-metrobus { --t1: #052e1c; --t2: #0f6b43; --t-acento: #34d399; }
+.tema-agua     { --t1: #06283d; --t2: #0b6a9a; --t-acento: #38bdf8; }
+.tema-sat      { --t1: #3a2204; --t2: #92570b; --t-acento: #fbbf24; }
+.tema-crm      { --t1: #072215; --t2: #0f5a45; --t-acento: #6ee7b7; }
+
+
+@media (min-width: 820px) {
+  .panel-hero { grid-template-columns: 1.15fr 0.85fr; padding: 2rem 2.2rem; }
+}
+
+
+.panel-hero-tag {
+  display: inline-block;
+  padding: 0.28rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.panel-hero h1 { margin: 0.7rem 0 0.35rem; font-size: clamp(1.5rem, 3vw, 2.15rem); line-height: 1.15; color: #fff; }
+.panel-hero p { margin: 0; color: rgba(255, 255, 255, 0.82); max-width: 34rem; }
+
+
+.hero-stats { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.2rem; }
+.hero-stat {
+  min-width: 96px;
+  padding: 0.55rem 0.8rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  animation: aparecer 0.5s ease-out both;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.hero-stat:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.2); }
+.hero-stat strong { display: block; font-size: 1.55rem; line-height: 1.1; color: var(--t-acento); }
+.hero-stat span { font-size: 0.76rem; letter-spacing: 0.03em; color: rgba(255, 255, 255, 0.85); }
+
+
+.panel-hero-arte { display: none; }
+@media (min-width: 820px) { .panel-hero-arte { display: block; } }
+.escena { width: 100%; height: auto; display: block; overflow: hidden; border-radius: 14px; }
+
+
+/* Piezas animadas de las ilustraciones */
+.bus-run { animation: busRun 9s linear infinite; }
+.rueda { transform-box: fill-box; transform-origin: center; animation: girar 0.7s linear infinite; }
+.linea-via { animation: flujo 1.2s linear infinite; }
+.ola { animation: ondas 7s linear infinite; }
+.ola-2 { animation-duration: 10s; animation-direction: reverse; }
+.gota-grande { transform-box: fill-box; transform-origin: center; animation: latido 3s ease-in-out infinite; }
+.gota-cae { animation: caer 3.2s ease-in infinite; }
+.doc { transform-box: fill-box; transform-origin: center; animation: volar 4s ease-in-out infinite; }
+.doc-2 { animation-delay: -2s; }
+.moneda { transform-box: fill-box; transform-origin: center; animation: voltear 2.4s ease-in-out infinite; }
+.orbita { transform-box: fill-box; transform-origin: center; animation: girar 24s linear infinite; }
+.nucleo { transform-box: fill-box; transform-origin: center; animation: latido 2.6s ease-in-out infinite; }
+.pulso { transform-box: fill-box; transform-origin: center; animation: pulsoNodo 2.4s ease-in-out infinite; }
+.linea-red { animation: flujo 2s linear infinite; }
+
+
+/* Tarjetas de formulario y tabla con acento lateral */
+.card:has(> h2), form.card { border-top: 3px solid var(--color-acento); }
+.card h2 { color: var(--color-primario); }
+
+
+/* Estado vacío */
+.vacio { padding: 2.2rem 1rem; text-align: center; color: var(--texto-secundario); }
+.vacio svg { color: #a7c4b5; animation: floatSlow 3s ease-in-out infinite; }
+.vacio p { margin-top: 0.5rem; font-weight: 600; }
+
+
+/* Botones con brillo al pasar el mouse */
+.btn-primary { position: relative; overflow: hidden; }
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
+}
+.btn-primary:hover:not(:disabled)::after { left: 130%; }
+
+
+/* Filas de tabla con entrada escalonada */
+.table tbody tr:nth-child(1) { animation-delay: 0.03s; }
+.table tbody tr:nth-child(2) { animation-delay: 0.08s; }
+.table tbody tr:nth-child(3) { animation-delay: 0.13s; }
+.table tbody tr:nth-child(4) { animation-delay: 0.18s; }
+.table tbody tr:nth-child(5) { animation-delay: 0.23s; }
+
+
+/* ==========================================================================
+   PÁGINA DE INICIO: tarjetas de módulos con ilustración
+   ========================================================================== */
+.modulo-card {
+  --t1: #072215; --t2: #114b30; --t-acento: #34d399;
+  overflow: hidden;
+  padding: 0;
+  border-top: none !important;
+  animation: aparecer 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 0.12s);
+}
+.modulo-card-arte {
+  background:
+    radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--t-acento) 40%, transparent), transparent 55%),
+    linear-gradient(135deg, var(--t1), var(--t2));
+  padding: 0.6rem 0.6rem 0;
+  transition: filter 0.3s ease;
+}
+.modulo-card-arte .escena { border-radius: 10px 10px 0 0; }
+.modulo-card:hover .modulo-card-arte { filter: brightness(1.15); }
+.modulo-card-cuerpo { padding: 1.1rem 1.3rem 1.3rem; }
+.modulo-card-cuerpo h3 { margin: 0.2rem 0 0.25rem; font-size: 1.15rem; color: var(--color-primario); }
+.modulo-card-cuerpo p { margin: 0 0 0.9rem; font-size: 0.9rem; color: var(--texto-secundario); }
+
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-hero *, .panel-hero::after, .modulo-card *, .vacio svg { animation: none !important; }
 }
