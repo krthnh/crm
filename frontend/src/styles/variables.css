@@ -1,6 +1,3 @@
-/* ==========================================================================
-   GRUPO 6 · CRM ANDINO · VISTA 360 — INTERFAZ MODERNA Y ANIMACIONES CSS3
-   ========================================================================== */
 :root {
   --color-primario: #0a2e1d;
   --color-primario-medio: #114b30;
@@ -20,13 +17,16 @@
   --font-mono: ui-monospace, 'Cascadia Code', monospace;
 }
 
+
 * {
   box-sizing: border-box;
 }
 
+
 html {
   scroll-behavior: smooth;
 }
+
 
 body {
   margin: 0;
@@ -36,6 +36,7 @@ body {
   line-height: 1.5;
   min-height: 100vh;
 }
+
 
 /* ==========================================================================
    ANIMACIONES KEYFRAMES
@@ -51,6 +52,7 @@ body {
   }
 }
 
+
 @keyframes fadeInRow {
   from {
     opacity: 0;
@@ -62,16 +64,19 @@ body {
   }
 }
 
+
 @keyframes pulseWarning {
   0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.45); }
   70% { box-shadow: 0 0 0 7px rgba(245, 158, 11, 0); }
   100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
 
+
 @keyframes floatSlow {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
 }
+
 
 /* ==========================================================================
    LAYOUT PRINCIPAL Y BARRA SUPERIOR CON DEGRADADO
@@ -81,6 +86,7 @@ body {
   display: flex;
   flex-direction: column;
 }
+
 
 .topbar {
   background: linear-gradient(135deg, #072215 0%, var(--color-primario) 55%, var(--color-primario-medio) 100%);
@@ -98,6 +104,7 @@ body {
   border-bottom: 2px solid rgba(16, 185, 129, 0.35);
 }
 
+
 .topbar-brand {
   font-weight: 800;
   font-size: 1.2rem;
@@ -110,6 +117,7 @@ body {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
+
 .topbar-brand::before {
   content: "";
   width: 10px;
@@ -120,10 +128,12 @@ body {
   animation: floatSlow 2.5s ease-in-out infinite;
 }
 
+
 .topbar-brand:hover {
   transform: translateX(2px);
   opacity: 0.92;
 }
+
 
 .topbar-user {
   display: flex;
@@ -136,11 +146,13 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
+
 .workspace {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
+
 
 .sidebar {
   background: var(--bg-sidebar);
@@ -151,6 +163,7 @@ body {
   gap: 0.4rem;
 }
 
+
 .main-content {
   flex: 1;
   padding: 1.5rem;
@@ -158,6 +171,7 @@ body {
   width: 100%;
   margin: 0 auto;
 }
+
 
 @media (min-width: 768px) {
   .workspace {
@@ -175,6 +189,7 @@ body {
   }
 }
 
+
 /* ==========================================================================
    ENLACES DEL MENÚ LATERAL CON TRANSICIONES SUAVES
    ========================================================================== */
@@ -190,6 +205,7 @@ body {
   transition: all 0.22s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+
 .nav-item small {
   font-size: 0.74rem;
   font-weight: 600;
@@ -199,12 +215,14 @@ body {
   transition: color 0.2s ease;
 }
 
+
 .nav-item:hover {
   background: #f0fdf4;
   color: var(--color-primario);
   border-left-color: var(--color-acento);
   transform: translateX(4px);
 }
+
 
 .nav-item.active {
   background: linear-gradient(135deg, var(--color-acento) 0%, var(--color-acento-hover) 100%);
@@ -213,9 +231,11 @@ body {
   transform: translateX(3px);
 }
 
+
 .nav-item.active small {
   color: var(--color-acento-suave);
 }
+
 
 /* ==========================================================================
    TARJETAS CON ENTRADA PROGRESIVA Y ELEVACIÓN
@@ -231,10 +251,12 @@ body {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
+
 .grid-2 .card:hover {
   transform: translateY(-4px);
   box-shadow: var(--sombra-hover);
 }
+
 
 .grid-2 {
   display: grid;
@@ -242,11 +264,13 @@ body {
   gap: 1.15rem;
 }
 
+
 @media (min-width: 640px) {
   .grid-2 {
     grid-template-columns: 1fr 1fr;
   }
 }
+
 
 /* ==========================================================================
    FORMULARIOS Y CONTROLES INTERACTIVOS
@@ -258,11 +282,13 @@ body {
   margin-bottom: 1rem;
 }
 
+
 .form-group label {
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--texto-principal);
 }
+
 
 .form-control {
   padding: 0.68rem 0.9rem;
@@ -274,9 +300,11 @@ body {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
+
 .form-control:hover:not([readonly]) {
   border-color: #a7c4b5;
 }
+
 
 .form-control:focus {
   outline: none;
@@ -285,6 +313,7 @@ body {
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.16);
 }
 
+
 .form-control[readonly] {
   background: #ecfdf5;
   border-style: dashed;
@@ -292,6 +321,7 @@ body {
   color: #065f46;
   font-weight: 600;
 }
+
 
 /* ==========================================================================
    BOTONES CON MICROINTERACCIONES
@@ -312,10 +342,12 @@ body {
   will-change: transform;
 }
 
+
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 
 .btn-primary {
   background: linear-gradient(135deg, var(--color-acento) 0%, var(--color-acento-hover) 100%);
@@ -323,14 +355,17 @@ body {
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.24);
 }
 
+
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
 }
 
+
 .btn-primary:active:not(:disabled) {
   transform: translateY(0) scale(0.97);
 }
+
 
 .btn-danger {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
@@ -338,14 +373,17 @@ body {
   box-shadow: 0 3px 10px rgba(220, 38, 38, 0.22);
 }
 
+
 .btn-danger:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 5px 14px rgba(220, 38, 38, 0.32);
 }
 
+
 .btn-danger:active:not(:disabled) {
   transform: scale(0.97);
 }
+
 
 .btn-outline {
   background: rgba(255, 255, 255, 0.12);
@@ -355,16 +393,19 @@ body {
   border-radius: 999px;
 }
 
+
 .btn-outline:hover {
   background: rgba(255, 255, 255, 0.24);
   transform: translateY(-1px);
 }
+
 
 .btn-sm {
   padding: 0.4rem 0.78rem;
   font-size: 0.84rem;
   border-radius: 8px;
 }
+
 
 /* ==========================================================================
    TABLAS MODERNAS CON FILAS ANIMADAS
@@ -375,11 +416,13 @@ body {
   border: 1px solid var(--borde);
 }
 
+
 .table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.93rem;
 }
+
 
 .table th {
   background: #f1f6f3;
@@ -393,6 +436,7 @@ body {
   border-bottom: 1px solid var(--borde);
 }
 
+
 .table td {
   padding: 0.85rem 1rem;
   border-top: 1px solid #edf2ef;
@@ -403,9 +447,11 @@ body {
   transition: background-color 0.2s ease;
 }
 
+
 .table tbody tr:hover {
   background-color: #f6fbf8;
 }
+
 
 .table a {
   color: var(--color-acento-hover);
@@ -417,9 +463,11 @@ body {
   transition: background 0.2s ease;
 }
 
+
 .table a:hover {
   background: #d1fae5;
 }
+
 
 /* ==========================================================================
    BADGES DE ESTADO Y ALERTAS CON ANIMACIÓN
@@ -437,11 +485,13 @@ body {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+
 .badge-gray {
   background: #e2e8f0;
   color: #334155;
   animation: pulseWarning 2.4s infinite;
 }
+
 
 .badge-amber {
   background: #fef3c7;
@@ -449,21 +499,25 @@ body {
   animation: pulseWarning 2s infinite;
 }
 
+
 .badge-green {
   background: #d1fae5;
   color: #065f46;
   box-shadow: 0 2px 6px rgba(16, 185, 129, 0.18);
 }
 
+
 .badge-red {
   background: #fee2e2;
   color: #991b1b;
 }
 
+
 .badge-blue {
   background: #dbeafe;
   color: #1e40af;
 }
+
 
 .alert {
   padding: 0.85rem 1.1rem;
@@ -473,6 +527,7 @@ body {
   animation: fadeSlideUp 0.3s ease-out both;
 }
 
+
 .alert-success {
   background: #ecfdf5;
   color: #065f46;
@@ -480,9 +535,284 @@ body {
   border-left: 4px solid var(--color-acento);
 }
 
+
 .alert-error {
   background: #fef2f2;
   color: #991b1b;
   border: 1px solid #fca5a5;
   border-left: 4px solid #ef4444;
+}
+
+
+/* ==========================================================================
+   FONDO ANDINO · CRM Andino (montañas + brillo verde + malla sutil)
+   Pegar AL FINAL de src/styles/variables.css
+   ========================================================================== */
+
+
+/* 1) Fondo general de la app (páginas internas) */
+body {
+  background-color: #eaf3ee;
+  background-image:
+    /* montañas lejanas */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 320' preserveAspectRatio='none'%3E%3Cpath fill='%23114b30' fill-opacity='0.10' d='M0 320L0 190L120 120L210 175L350 65L480 185L590 105L740 235L860 135L1020 255L1150 165L1290 265L1410 205L1550 295L1600 255L1600 320 z'/%3E%3C/svg%3E"),
+    /* montañas cercanas */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 220' preserveAspectRatio='none'%3E%3Cpath fill='%230a2e1d' fill-opacity='0.14' d='M0 220L0 130L100 80L220 140L330 50L470 150L590 90L740 180L850 110L1010 190L1130 130L1260 200L1400 150L1530 210L1600 170L1600 220 z'/%3E%3C/svg%3E"),
+    /* resplandores de color */
+    radial-gradient(circle at 92% 6%, rgba(16, 185, 129, 0.28) 0%, transparent 38%),
+    radial-gradient(circle at 4% 88%, rgba(17, 75, 48, 0.18) 0%, transparent 42%),
+    /* malla de puntos muy suave */
+    radial-gradient(rgba(10, 46, 29, 0.10) 1px, transparent 1px),
+    /* degradado base */
+    linear-gradient(160deg, #f4faf7 0%, #e3efe8 55%, #d5e7dd 100%);
+  background-size:
+    100% 320px,
+    100% 220px,
+    auto,
+    auto,
+    26px 26px,
+    auto;
+  background-position:
+    bottom center,
+    bottom center,
+    0 0,
+    0 0,
+    0 0,
+    0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+  background-attachment: fixed;
+}
+
+
+/* El menú lateral deja ver el fondo (efecto vidrio) */
+.sidebar {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+
+/* Tarjetas ligeramente translúcidas para que el fondo "respire" */
+.card {
+  background: rgba(255, 255, 255, 0.93);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+
+/* 2) Fondo del Login (oscuro, con montañas y luces) */
+.login-bg {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+  background-color: #072215;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 340' preserveAspectRatio='none'%3E%3Cpath fill='%2310b981' fill-opacity='0.12' d='M0 340L0 210L120 140L210 195L350 85L480 205L590 125L740 255L860 155L1020 275L1150 185L1290 285L1410 225L1550 315L1600 275L1600 340 z'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 240' preserveAspectRatio='none'%3E%3Cpath fill='%23000' fill-opacity='0.30' d='M0 240L0 150L100 100L220 160L330 70L470 170L590 110L740 200L850 130L1010 210L1130 150L1260 220L1400 170L1530 230L1600 190L1600 240 z'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 80% 15%, rgba(16, 185, 129, 0.35) 0%, transparent 40%),
+    radial-gradient(circle at 12% 75%, rgba(52, 211, 153, 0.18) 0%, transparent 45%),
+    radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(135deg, #051a10 0%, #0a2e1d 50%, #114b30 100%);
+  background-size: 100% 340px, 100% 240px, auto, auto, 28px 28px, auto;
+  background-position: bottom center, bottom center, 0 0, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+}
+
+
+/* Círculos flotantes decorativos (usa animación que ya tienes) */
+.login-bg::before,
+.login-bg::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: floatSlow 6s ease-in-out infinite;
+}
+.login-bg::before {
+  width: 340px;
+  height: 340px;
+  top: -110px;
+  left: -90px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.30), transparent 70%);
+}
+.login-bg::after {
+  width: 420px;
+  height: 420px;
+  bottom: -160px;
+  right: -120px;
+  background: radial-gradient(circle, rgba(110, 231, 183, 0.22), transparent 70%);
+  animation-delay: -3s;
+}
+
+
+/* La tarjeta del login queda por encima de los adornos */
+.login-bg > form {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+
+/* ==========================================================================
+   LOGIN / REGISTRO (dos columnas: marca + formulario)
+   ========================================================================== */
+.login-wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1000px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+
+@media (min-width: 900px) {
+  .login-wrap { grid-template-columns: 1.1fr 0.9fr; gap: 3.5rem; }
+}
+
+
+.login-brand { color: #fff; display: none; }
+@media (min-width: 900px) { .login-brand { display: block; } }
+
+
+.login-brand-tag {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(110, 231, 183, 0.4);
+  color: #a7f3d0;
+}
+
+
+.login-brand h1 {
+  margin: 1rem 0;
+  font-size: 3rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+.login-brand h1 span { color: #6ee7b7; }
+.login-brand p { color: #c7e8d6; font-size: 1.05rem; max-width: 30rem; }
+
+
+.login-brand ul {
+  list-style: none;
+  padding: 0;
+  margin: 1.8rem 0 0;
+  display: grid;
+  gap: 0.7rem;
+  max-width: 26rem;
+}
+.login-brand li {
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 3px solid var(--color-acento);
+  backdrop-filter: blur(6px);
+}
+.login-brand li small { color: #a7d9bf; }
+
+
+.login-card { margin-bottom: 0; padding: 1.8rem; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35); }
+
+
+.login-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #eef4f0;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 1.3rem;
+}
+.login-tabs button {
+  border: none;
+  background: transparent;
+  padding: 0.6rem;
+  border-radius: 9px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--texto-secundario);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.login-tabs button.activo {
+  background: #fff;
+  color: var(--color-primario);
+  box-shadow: 0 2px 8px rgba(10, 46, 29, 0.12);
+}
+
+
+.login-titulo { margin: 0; font-size: 1.5rem; color: var(--color-primario); }
+.login-sub { margin: 0.2rem 0 1.2rem; color: var(--texto-secundario); font-size: 0.93rem; }
+
+
+.input-clave { position: relative; }
+.input-clave .form-control { width: 100%; padding-right: 4.2rem; }
+.input-clave button {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  color: var(--color-acento-hover);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+
+.modulo-opciones { display: grid; gap: 0.5rem; }
+.modulo-opciones button {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 0.6rem 0.9rem;
+  border: 1.5px solid var(--borde);
+  border-radius: 10px;
+  background: #fcfefd;
+  font: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.modulo-opciones button small { color: var(--texto-secundario); }
+.modulo-opciones button:hover { border-color: #a7c4b5; }
+.modulo-opciones button.activo {
+  border-color: var(--color-acento);
+  background: #ecfdf5;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+
+.login-rapidas {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: var(--texto-secundario);
+  background: #f4f8f6;
+  padding: 0.65rem;
+  border-radius: 8px;
+}
+
+
+.login-cambio { margin: 1rem 0 0; text-align: center; font-size: 0.9rem; color: var(--texto-secundario); }
+.login-cambio button {
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  color: var(--color-acento-hover);
+  cursor: pointer;
+  text-decoration: underline;
 }
