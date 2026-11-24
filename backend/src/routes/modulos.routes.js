@@ -2,14 +2,32 @@ import { Router } from 'express';
 import { sql } from '../config/db.js';
 import { verificarRol } from '../middlewares/roleMiddleware.js';
 
+
 const router = Router();
 const genCodigo = (prefijo) => `${prefijo}-${Math.floor(10000 + Math.random() * 90000)}`;
+
 
 // ============================================================================
 // 1. MÓDULO METROBUS (recargas_tarjeta)
 // ============================================================================
+// Agrega (una sola vez) las columnas del método de pago si aún no existen en Neon
+const METODOS_PAGO = ['tarjeta', 'yape', 'plin'];
+let columnasPagoListas = false;
+const asegurarColumnasPago = async () => {
+  if (columnasPagoListas) return;
+  try {
+    await sql`ALTER TABLE recargas_tarjeta ADD COLUMN IF NOT EXISTS metodo_pago VARCHAR(20)`;
+    await sql`ALTER TABLE recargas_tarjeta ADD COLUMN IF NOT EXISTS referencia_pago VARCHAR(40)`;
+    columnasPagoListas = true;
+  } catch (e) {
+    console.error('No se pudieron crear las columnas de pago:', e.message);
+  }
+};
+
+
 router.get('/metrobus', verificarRol('metrobus'), async (req, res) => {
   try {
+    await asegurarColumnasPago();
     const filas = req.rolModulo === 'cliente'
       ? await sql`SELECT r.*, u.nombre AS usuario_nombre FROM recargas_tarjeta r JOIN usuarios u ON u.id = r.id_usuario WHERE r.id_usuario = ${req.usuarioId} ORDER BY r.creado_en DESC`
       : await sql`SELECT r.*, u.nombre AS usuario_nombre FROM recargas_tarjeta r JOIN usuarios u ON u.id = r.id_usuario ORDER BY r.creado_en DESC`;
@@ -19,13 +37,26 @@ router.get('/metrobus', verificarRol('metrobus'), async (req, res) => {
   }
 });
 
-router.post('/metrobus', verificarRol('metrobus', ['cliente', 'administrador']), async (req, res) => {
-  const { numero_tarjeta, monto, imagen_id = null } = req.body;
+
+// Solo los CLIENTES pueden pagar recargas (los administradores solo gestionan)
+router.post('/metrobus', verificarRol('metrobus', ['cliente']), async (req, res) => {
+  const { numero_tarjeta, monto, imagen_id = null, metodo_pago, referencia_pago = null } = req.body;
+
+
+  if (!METODOS_PAGO.includes(metodo_pago)) {
+    return res.status(400).json({ error: 'Seleccione un método de pago válido (tarjeta, Yape o Plin)' });
+  }
+  if (!(Number(monto) > 0)) {
+    return res.status(400).json({ error: 'Ingrese un monto válido' });
+  }
+
+
   try {
+    await asegurarColumnasPago();
     const codigo = genCodigo('RCG');
     const [nuevo] = await sql`
-      INSERT INTO recargas_tarjeta (codigo, id_usuario, numero_tarjeta, monto, estado, imagen_id)
-      VALUES (${codigo}, ${req.usuarioId}, ${numero_tarjeta}, ${Number(monto)}, 'registrado', ${imagen_id})
+      INSERT INTO recargas_tarjeta (codigo, id_usuario, numero_tarjeta, monto, estado, imagen_id, metodo_pago, referencia_pago)
+      VALUES (${codigo}, ${req.usuarioId}, ${numero_tarjeta}, ${Number(monto)}, 'registrado', ${imagen_id}, ${metodo_pago}, ${referencia_pago})
       RETURNING *
     `;
     res.status(201).json(nuevo);
@@ -33,6 +64,7 @@ router.post('/metrobus', verificarRol('metrobus', ['cliente', 'administrador']),
     res.status(500).json({ error: 'Error al registrar recarga' });
   }
 });
+
 
 router.patch('/metrobus/:id/estado', verificarRol('metrobus', ['empleado', 'administrador']), async (req, res) => {
   const { estado } = req.body;
@@ -46,6 +78,7 @@ router.patch('/metrobus/:id/estado', verificarRol('metrobus', ['empleado', 'admi
   }
 });
 
+
 router.delete('/metrobus/:id', verificarRol('metrobus', ['administrador']), async (req, res) => {
   try {
     await sql`DELETE FROM recargas_tarjeta WHERE id = ${Number(req.params.id)}`;
@@ -54,6 +87,7 @@ router.delete('/metrobus/:id', verificarRol('metrobus', ['administrador']), asyn
     res.status(500).json({ error: 'Error al eliminar recarga' });
   }
 });
+
 
 // ============================================================================
 // 2. MÓDULO AGUAVIVA (reportes_fuga)
@@ -68,6 +102,7 @@ router.get('/agua', verificarRol('agua'), async (req, res) => {
     res.status(500).json({ error: 'Error al listar fugas' });
   }
 });
+
 
 router.post('/agua', verificarRol('agua', ['cliente', 'administrador']), async (req, res) => {
   const { ubicacion, tipo_fuga, urgencia, imagen_id = null } = req.body;
@@ -84,6 +119,7 @@ router.post('/agua', verificarRol('agua', ['cliente', 'administrador']), async (
   }
 });
 
+
 router.patch('/agua/:id/estado', verificarRol('agua', ['empleado', 'administrador']), async (req, res) => {
   const { estado } = req.body;
   try {
@@ -96,6 +132,7 @@ router.patch('/agua/:id/estado', verificarRol('agua', ['empleado', 'administrado
   }
 });
 
+
 router.delete('/agua/:id', verificarRol('agua', ['administrador']), async (req, res) => {
   try {
     await sql`DELETE FROM reportes_fuga WHERE id = ${Number(req.params.id)}`;
@@ -104,6 +141,7 @@ router.delete('/agua/:id', verificarRol('agua', ['administrador']), async (req, 
     res.status(500).json({ error: 'Error al eliminar fuga' });
   }
 });
+
 
 // ============================================================================
 // 3. MÓDULO SAT PERÚ (reclamos_tributarios)
@@ -118,6 +156,7 @@ router.get('/sat', verificarRol('sat'), async (req, res) => {
     res.status(500).json({ error: 'Error al listar reclamos' });
   }
 });
+
 
 router.post('/sat', verificarRol('sat', ['cliente', 'administrador']), async (req, res) => {
   const { predio, tributo, motivo, imagen_id = null } = req.body;
@@ -134,6 +173,7 @@ router.post('/sat', verificarRol('sat', ['cliente', 'administrador']), async (re
   }
 });
 
+
 router.patch('/sat/:id/estado', verificarRol('sat', ['empleado', 'administrador']), async (req, res) => {
   const { estado } = req.body;
   try {
@@ -146,6 +186,7 @@ router.patch('/sat/:id/estado', verificarRol('sat', ['empleado', 'administrador'
   }
 });
 
+
 router.delete('/sat/:id', verificarRol('sat', ['administrador']), async (req, res) => {
   try {
     await sql`DELETE FROM reclamos_tributarios WHERE id = ${Number(req.params.id)}`;
@@ -154,6 +195,7 @@ router.delete('/sat/:id', verificarRol('sat', ['administrador']), async (req, re
     res.status(500).json({ error: 'Error al eliminar reclamo' });
   }
 });
+
 
 // ============================================================================
 // 4. MÓDULO CRM ANDINO Y VISTA 360 (solicitudes_demo_crm + vista_360)
@@ -168,6 +210,7 @@ router.get('/crm/demos', verificarRol('crm'), async (req, res) => {
     res.status(500).json({ error: 'Error al listar solicitudes de demo' });
   }
 });
+
 
 router.post('/crm/demos', verificarRol('crm', ['cliente', 'administrador']), async (req, res) => {
   const { empresa, contacto } = req.body;
@@ -184,12 +227,14 @@ router.post('/crm/demos', verificarRol('crm', ['cliente', 'administrador']), asy
   }
 });
 
+
 router.patch('/crm/demos/:id/estado', verificarRol('crm', ['empleado', 'administrador']), async (req, res) => {
   const { estado } = req.body;
   try {
     const [demo] = await sql`
       UPDATE solicitudes_demo_crm SET estado = ${estado} WHERE id = ${Number(req.params.id)} RETURNING *
     `;
+
 
     // RF-6.2: Al aprobar demo, asegura el rol cliente en el módulo crm
     if (demo && estado === 'aprobada') {
@@ -200,11 +245,13 @@ router.patch('/crm/demos/:id/estado', verificarRol('crm', ['empleado', 'administ
       `;
     }
 
+
     res.json(demo);
   } catch (error) {
     res.status(500).json({ error: 'Error al actualizar solicitud de demo' });
   }
 });
+
 
 // Consulta consolidada Vista 360 para Admin CRM
 router.get('/crm/vista-360', verificarRol('crm', ['administrador', 'empleado']), async (req, res) => {
@@ -222,6 +269,7 @@ router.get('/crm/vista-360', verificarRol('crm', ['administrador', 'empleado']),
   }
 });
 
+
 // Seguimiento propio de reportes cruzados (para MetroBus / empresas)
 router.get('/mis-reportes-cruzados', async (req, res) => {
   const userId = req.headers['x-user-id'];
@@ -235,5 +283,6 @@ router.get('/mis-reportes-cruzados', async (req, res) => {
     res.status(500).json({ error: 'Error al consultar mis reportes' });
   }
 });
+
 
 export default router;
