@@ -4,9 +4,10 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 
 const MODULOS_CLIENTE = [
-  { id: 'metrobus', nombre: 'MetroBus Lima', desc: 'Transporte público' },
-  { id: 'agua', nombre: 'AguaViva Huancayo', desc: 'Agua potable y fugas' },
-  { id: 'sat', nombre: 'SAT Perú', desc: 'Arbitrios y tributos' },
+  { id: 'metrobus', nombre: 'MetroBus Lima', desc: 'Recargas de tarjeta y pagos' },
+  { id: 'agua', nombre: 'AguaViva Huancayo', desc: 'Reporte de fugas de agua' },
+  { id: 'sat', nombre: 'SAT Perú', desc: 'Reclamos de arbitrios y tributos' },
+  { id: 'crm', nombre: 'CRM Andino', desc: 'Solicitud de demos y seguimiento' },
 ];
 
 
@@ -27,7 +28,6 @@ export default function Login() {
   const [correoReg, setCorreoReg] = useState('');
   const [claveReg, setClaveReg] = useState('');
   const [claveReg2, setClaveReg2] = useState('');
-  const [modulo, setModulo] = useState('metrobus');
 
 
   const { login, registrar } = useAuth();
@@ -69,7 +69,7 @@ export default function Login() {
 
     setCargando(true);
     try {
-      await registrar({ nombre, correo: correoReg, contrasena: claveReg, modulo });
+      await registrar({ nombre, correo: correoReg, contrasena: claveReg });
       navigate('/inicio');
     } catch (err) {
       setError(err.message);
@@ -90,8 +90,8 @@ export default function Login() {
           <span className="login-brand-tag">Grupo 6 · Trabajo Final</span>
           <h1>CRM Andino<br /><span>Vista 360</span></h1>
           <p>
-            Una sola cuenta para ver y gestionar tus servicios: transporte, agua y tributos,
-            conectados en una misma plataforma.
+            Una sola cuenta para ver y gestionar tus servicios: transporte, agua, tributos
+            y CRM, conectados en una misma plataforma.
           </p>
           <ul>
             {MODULOS_CLIENTE.map((m) => (
@@ -203,15 +203,11 @@ export default function Login() {
               </div>
 
 
-              <div className="form-group">
-                <label>¿Qué servicio quieres usar primero?</label>
-                <div className="modulo-opciones">
+              <div className="registro-incluye">
+                <strong>Tu cuenta incluye acceso a los 4 servicios:</strong>
+                <div className="registro-incluye-chips">
                   {MODULOS_CLIENTE.map((m) => (
-                    <button type="button" key={m.id}
-                      className={modulo === m.id ? 'activo' : ''} onClick={() => setModulo(m.id)}>
-                      <strong>{m.nombre}</strong>
-                      <small>{m.desc}</small>
-                    </button>
+                    <span key={m.id} className={`chip-servicio tema-${m.id}`}>✓ {m.nombre}</span>
                   ))}
                 </div>
               </div>
