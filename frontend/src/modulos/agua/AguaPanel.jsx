@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { apiFetch, API_URL } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -5,11 +6,9 @@ import BadgeEstado from '../../components/common/BadgeEstado.jsx';
 import PanelHero, { EstadoVacio } from '../../components/common/PanelHero.jsx';
 import SubirImagenNeon from '../../components/common/SubirImagenNeon.jsx';
 
-
 export default function AguaPanel() {
   const { obtenerRol } = useAuth();
   const rol = obtenerRol('agua');
-
 
   const [fugas, setFugas] = useState([]);
   const [ubicacion, setUbicacion] = useState('');
@@ -18,7 +17,6 @@ export default function AguaPanel() {
   const [imagenId, setImagenId] = useState(null);
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
-
 
   const cargar = async () => {
     try {
@@ -29,11 +27,9 @@ export default function AguaPanel() {
     }
   };
 
-
   useEffect(() => {
     cargar();
   }, []);
-
 
   const handleCrear = async (e) => {
     e.preventDefault();
@@ -53,7 +49,6 @@ export default function AguaPanel() {
     }
   };
 
-
   const cambiarEstado = async (id, estado) => {
     try {
       await apiFetch(`/api/agua/${id}/estado`, {
@@ -66,7 +61,6 @@ export default function AguaPanel() {
     }
   };
 
-
   const eliminar = async (id) => {
     try {
       await apiFetch(`/api/agua/${id}`, { method: 'DELETE' });
@@ -75,7 +69,6 @@ export default function AguaPanel() {
       setError(err.message);
     }
   };
-
 
   return (
     <div>
@@ -91,10 +84,8 @@ export default function AguaPanel() {
         ]}
       />
 
-
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-error">{error}</div>}
-
 
       {(rol === 'cliente' || rol === 'administrador') && (
         <form onSubmit={handleCrear} className="card">
@@ -133,7 +124,6 @@ export default function AguaPanel() {
         </form>
       )}
 
-
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Panel de reportes ({fugas.length})</h2>
         <div className="table-wrap">
@@ -151,7 +141,7 @@ export default function AguaPanel() {
             </thead>
             <tbody>
               {fugas.map((f) => (
-                <tr key={f.id}>
+                <tr key={f.id} className={f.estado === 'atendido' ? 'fila-cerrada' : undefined}>
                   <td><strong>{f.codigo}</strong></td>
                   <td>{f.reportante}</td>
                   <td>{f.ubicacion}</td>
@@ -166,11 +156,11 @@ export default function AguaPanel() {
                   <td><BadgeEstado estado={f.estado} /></td>
                   {(rol === 'empleado' || rol === 'administrador') && (
                     <td style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                      <button type="button" className="btn btn-primary btn-sm" onClick={() => cambiarEstado(f.id, 'atendido')}>
+                      <button type="button" className="btn btn-primary btn-sm" disabled={f.estado === 'atendido'} title={f.estado === 'atendido' ? 'Operación cerrada' : undefined} onClick={() => cambiarEstado(f.id, 'atendido')}>
                         Marcar atendido
                       </button>
                       {rol === 'administrador' && (
-                        <button type="button" className="btn btn-danger btn-sm" onClick={() => eliminar(f.id)}>
+                        <button type="button" className="btn btn-danger btn-sm" disabled={f.estado === 'atendido'} title={f.estado === 'atendido' ? 'Operación cerrada' : undefined} onClick={() => eliminar(f.id)}>
                           Eliminar
                         </button>
                       )}
