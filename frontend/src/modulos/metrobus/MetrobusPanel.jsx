@@ -6,11 +6,9 @@ import PanelHero, { EstadoVacio } from '../../components/common/PanelHero.jsx';
 import SubirImagenNeon from '../../components/common/SubirImagenNeon.jsx';
 import MetodosPago, { BadgeMetodo } from '../../components/common/MetodosPago.jsx';
 
-
 export default function MetrobusPanel() {
   const { obtenerRol } = useAuth();
   const rol = obtenerRol('metrobus');
-
 
   const [registros, setRegistros] = useState([]);
   const [numeroTarjeta, setNumeroTarjeta] = useState('');
@@ -22,7 +20,6 @@ export default function MetrobusPanel() {
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
 
-
   const cargar = async () => {
     try {
       const data = await apiFetch('/api/metrobus');
@@ -32,17 +29,14 @@ export default function MetrobusPanel() {
     }
   };
 
-
   useEffect(() => {
     cargar();
   }, []);
-
 
   const handleCrear = async (e) => {
     e.preventDefault();
     setMensaje('');
     setError('');
-
 
     if (!pago.referencia) {
       setError(pago.metodo === 'tarjeta'
@@ -50,7 +44,6 @@ export default function MetrobusPanel() {
         : 'Ingrese el número de operación de su pago');
       return;
     }
-
 
     setProcesando(true);
     try {
@@ -79,7 +72,6 @@ export default function MetrobusPanel() {
     }
   };
 
-
   const cambiarEstado = async (id, estado) => {
     try {
       await apiFetch(`/api/metrobus/${id}/estado`, {
@@ -92,7 +84,6 @@ export default function MetrobusPanel() {
     }
   };
 
-
   const eliminar = async (id) => {
     try {
       await apiFetch(`/api/metrobus/${id}`, { method: 'DELETE' });
@@ -101,7 +92,6 @@ export default function MetrobusPanel() {
       setError(err.message);
     }
   };
-
 
   return (
     <div>
@@ -118,15 +108,12 @@ export default function MetrobusPanel() {
         ]}
       />
 
-
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-error">{error}</div>}
-
 
       {rol === 'cliente' && (
         <form onSubmit={handleCrear} className="card recarga-form" key={formKey}>
           <h2 style={{ marginTop: 0 }}>Recargar mi tarjeta</h2>
-
 
           <div className="paso-titulo"><span>1</span> Datos de la recarga</div>
           <div className="grid-2">
@@ -164,21 +151,17 @@ export default function MetrobusPanel() {
             </div>
           </div>
 
-
           <div className="paso-titulo"><span>2</span> Método de pago</div>
           <MetodosPago metodo={pago.metodo} onChange={setPago} />
 
-
           <div className="paso-titulo"><span>3</span> Comprobante</div>
           <SubirImagenNeon onImagenSubida={setImagenId} imagenActualId={imagenId} />
-
 
           <button type="submit" className="btn btn-primary btn-pagar" disabled={procesando}>
             {procesando ? (<><span className="spinner" /> Procesando pago...</>) : (<>Pagar S/ {Number(monto || 0).toFixed(2)}</>)}
           </button>
         </form>
       )}
-
 
       {rol === 'administrador' && (
         <div className="card aviso-bloqueado">
@@ -192,7 +175,6 @@ export default function MetrobusPanel() {
           </div>
         </div>
       )}
-
 
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Listado de recargas ({registros.length})</h2>
@@ -212,7 +194,7 @@ export default function MetrobusPanel() {
             </thead>
             <tbody>
               {registros.map((r) => (
-                <tr key={r.id}>
+                <tr key={r.id} className={r.estado === 'pagado' ? 'fila-cerrada' : undefined}>
                   <td className="nw"><strong>{r.codigo}</strong></td>
                   <td>{r.usuario_nombre}</td>
                   <td className="nw">{r.numero_tarjeta}</td>
@@ -228,11 +210,11 @@ export default function MetrobusPanel() {
                   <td><BadgeEstado estado={r.estado} /></td>
                   {(rol === 'empleado' || rol === 'administrador') && (
                     <td style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                      <button type="button" className="btn btn-primary btn-sm" onClick={() => cambiarEstado(r.id, 'pagado')}>
+                      <button type="button" className="btn btn-primary btn-sm" disabled={r.estado === 'pagado'} title={r.estado === 'pagado' ? 'Operación cerrada' : undefined} onClick={() => cambiarEstado(r.id, 'pagado')}>
                         Validar pago
                       </button>
                       {rol === 'administrador' && (
-                        <button type="button" className="btn btn-danger btn-sm" onClick={() => eliminar(r.id)}>
+                        <button type="button" className="btn btn-danger btn-sm" disabled={r.estado === 'pagado'} title={r.estado === 'pagado' ? 'Operación cerrada' : undefined} onClick={() => eliminar(r.id)}>
                           Eliminar
                         </button>
                       )}
