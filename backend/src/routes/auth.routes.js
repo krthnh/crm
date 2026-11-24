@@ -52,19 +52,16 @@ router.post('/login', async (req, res) => {
 });
 
 
-// POST /api/auth/register -> Registro de nuevo cliente
+// POST /api/auth/register -> Registro de nuevo cliente en los 4 servicios
+const MODULOS_CLIENTE = ['metrobus', 'agua', 'sat', 'crm'];
+
+
 router.post('/register', async (req, res) => {
-  const { nombre, correo, contrasena, modulo = 'metrobus' } = req.body;
+  const { nombre, correo, contrasena } = req.body;
 
 
   if (!nombre || !correo || !contrasena) {
     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  }
-
-
-  // Los clientes nuevos solo pueden registrarse en estos módulos (CRM es para personal)
-  if (!['metrobus', 'agua', 'sat'].includes(modulo)) {
-    return res.status(400).json({ error: 'Módulo no válido' });
   }
 
 
@@ -73,29 +70,40 @@ router.post('/register', async (req, res) => {
   }
 
 
+  let usuario = null;
   try {
     const nuevo = await sql`
       INSERT INTO usuarios (nombre, correo, contrasena)
       VALUES (${nombre.trim()}, ${correo.trim().toLowerCase()}, ${contrasena})
       RETURNING id, nombre, correo
     `;
+    usuario = nuevo[0];
 
 
-    const usuario = nuevo[0];
-
-
-    await sql`
-      INSERT INTO usuario_rol (id_usuario, modulo, rol)
-      VALUES (${usuario.id}, ${modulo}, 'cliente')
-    `;
+    // El mismo cliente queda registrado en MetroBus, AguaViva, SAT y CRM Andino
+    for (const modulo of MODULOS_CLIENTE) {
+      await sql`
+        INSERT INTO usuario_rol (id_usuario, modulo, rol)
+        VALUES (${usuario.id}, ${modulo}, 'cliente')
+      `;
+    }
 
 
     res.status(201).json({
-      mensaje: 'Usuario registrado correctamente',
+      mensaje: 'Usuario registrado correctamente en los 4 servicios',
       usuario,
-      roles: [{ modulo, rol: 'cliente' }]
+      roles: MODULOS_CLIENTE.map((modulo) => ({ modulo, rol: 'cliente' }))
     });
   } catch (error) {
+    // Si algo falló a mitad del proceso, se deshace para no dejar un usuario incompleto
+    if (usuario) {
+      try {
+        await sql`DELETE FROM usuario_rol WHERE id_usuario = ${usuario.id}`;
+        await sql`DELETE FROM usuarios WHERE id = ${usuario.id}`;
+      } catch (e) {
+        console.error('No se pudo revertir el registro:', e.message);
+      }
+    }
     if (error.code === '23505') {
       return res.status(409).json({ error: 'El correo ya está registrado' });
     }
