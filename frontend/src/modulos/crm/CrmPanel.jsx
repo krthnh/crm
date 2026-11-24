@@ -2,16 +2,20 @@ import { useEffect, useState } from 'react';
 import { apiFetch } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import BadgeEstado from '../../components/common/BadgeEstado.jsx';
+import PanelHero, { EstadoVacio } from '../../components/common/PanelHero.jsx';
+
 
 export default function CrmPanel() {
   const { usuario, obtenerRol } = useAuth();
   const rol = obtenerRol('crm');
+
 
   const [demos, setDemos] = useState([]);
   const [empresa, setEmpresa] = useState(usuario?.nombre || '');
   const [contacto, setContacto] = useState(usuario?.correo || '');
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
+
 
   const cargar = async () => {
     try {
@@ -22,9 +26,11 @@ export default function CrmPanel() {
     }
   };
 
+
   useEffect(() => {
     cargar();
   }, []);
+
 
   const solicitarDemo = async (e) => {
     e.preventDefault();
@@ -42,6 +48,7 @@ export default function CrmPanel() {
     }
   };
 
+
   const aprobarDemo = async (id) => {
     try {
       await apiFetch(`/api/crm/demos/${id}/estado`, {
@@ -55,17 +62,25 @@ export default function CrmPanel() {
     }
   };
 
+
   return (
     <div>
-      <div className="card">
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#16a34a', fontWeight: 700 }}>
-          MÓDULO CRM ANDINO PERÚ · ROL ACTIVO: {rol?.toUpperCase()}
-        </p>
-        <h1 style={{ margin: '0.2rem 0 0', color: '#0f3d24' }}>Solicitudes de Demo CRM (HU-6.3)</h1>
-      </div>
+      <PanelHero
+        modulo="crm"
+        rol={rol}
+        titulo="Solicitudes de Demo CRM (HU-6.3)"
+        subtitulo="Solicita una demostración del CRM Andino y gestiona la aprobación de nuevas empresas."
+        stats={[
+          { label: 'Solicitudes', valor: demos.length },
+          { label: 'Pendientes', valor: demos.filter((d) => d.estado !== 'aprobada').length },
+          { label: 'Clientes activos', valor: demos.filter((d) => d.estado === 'aprobada').length },
+        ]}
+      />
+
 
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-error">{error}</div>}
+
 
       {rol === 'cliente' && (
         <form onSubmit={solicitarDemo} className="card">
@@ -95,6 +110,7 @@ export default function CrmPanel() {
           <button type="submit" className="btn btn-primary">Solicitar demo</button>
         </form>
       )}
+
 
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Solicitudes registradas ({demos.length})</h2>
@@ -129,6 +145,9 @@ export default function CrmPanel() {
                   )}
                 </tr>
               ))}
+              {demos.length === 0 && (
+                <tr><td colSpan={7}><EstadoVacio texto="Aún no hay solicitudes de demo" /></td></tr>
+              )}
             </tbody>
           </table>
         </div>
