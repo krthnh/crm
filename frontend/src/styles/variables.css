@@ -452,6 +452,8 @@ body {
 .table tbody tr:hover {
   background-color: #f6fbf8;
 }
+
+
 .table a {
   color: var(--color-acento-hover);
   font-weight: 600;
@@ -555,7 +557,6 @@ body {
   background-image:
     /* montañas lejanas */
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 320' preserveAspectRatio='none'%3E%3Cpath fill='%23114b30' fill-opacity='0.10' d='M0 320L0 190L120 120L210 175L350 65L480 185L590 105L740 235L860 135L1020 255L1150 165L1290 265L1410 205L1550 295L1600 255L1600 320 z'/%3E%3C/svg%3E"),
-    /* montañas cercanas */
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 220' preserveAspectRatio='none'%3E%3Cpath fill='%230a2e1d' fill-opacity='0.14' d='M0 220L0 130L100 80L220 140L330 50L470 150L590 90L740 180L850 110L1010 190L1130 130L1260 200L1400 150L1530 210L1600 170L1600 220 z'/%3E%3C/svg%3E"),
     /* resplandores de color */
     radial-gradient(circle at 92% 6%, rgba(16, 185, 129, 0.28) 0%, transparent 38%),
@@ -985,3 +986,223 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .panel-hero *, .panel-hero::after, .modulo-card *, .vacio svg { animation: none !important; }
 }
+
+
+/* ==========================================================================
+   MÉTODOS DE PAGO (MetroBus)
+   ========================================================================== */
+@keyframes aparecerSuave { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes girarSpinner { to { transform: rotate(360deg); } }
+@keyframes pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes tilt { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
+
+
+.paso-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1.2rem 0 0.8rem;
+  font-weight: 700;
+  color: var(--color-primario);
+}
+.paso-titulo:first-of-type { margin-top: 0.4rem; }
+.paso-titulo span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 0.82rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--color-acento), var(--color-acento-hover));
+  box-shadow: 0 3px 8px rgba(16, 185, 129, 0.35);
+}
+
+
+.montos-rapidos { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.35rem; }
+.montos-rapidos button {
+  border: 1.5px solid var(--borde);
+  background: #fcfefd;
+  border-radius: 999px;
+  padding: 0.25rem 0.8rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-primario);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.montos-rapidos button:hover { border-color: var(--color-acento); transform: translateY(-1px); }
+.montos-rapidos button.activo { background: var(--color-acento); border-color: var(--color-acento); color: #fff; }
+
+
+/* Opciones de pago */
+.pago-opciones { display: grid; grid-template-columns: 1fr; gap: 0.7rem; }
+@media (min-width: 560px) { .pago-opciones { grid-template-columns: repeat(3, 1fr); } }
+
+
+.pago-opcion {
+  --c: #10b981;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 1rem 0.6rem 0.85rem;
+  border: 2px solid var(--borde);
+  border-radius: 14px;
+  background: #fcfefd;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.pago-opcion.pago-tarjeta { --c: #0f766e; }
+.pago-opcion.pago-yape    { --c: #742284; }
+.pago-opcion.pago-plin    { --c: #0891b2; }
+.pago-opcion:hover { transform: translateY(-3px); border-color: var(--c); box-shadow: 0 8px 20px color-mix(in srgb, var(--c) 22%, transparent); }
+.pago-opcion small { color: var(--texto-secundario); font-size: 0.76rem; }
+.pago-opcion .pago-ico { width: 46px; height: 46px; color: var(--c); transition: transform 0.25s ease; }
+.pago-opcion:hover .pago-ico { transform: scale(1.1) rotate(-4deg); }
+.pago-ico svg { width: 100%; height: 100%; display: block; }
+.pago-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--c);
+  transform: scale(0);
+}
+.pago-opcion.activo {
+  border-color: var(--c);
+  background: color-mix(in srgb, var(--c) 8%, #fff);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 18%, transparent);
+}
+.pago-opcion.activo .pago-check { animation: pop 0.35s ease forwards; }
+
+
+/* Detalle del método elegido */
+.pago-detalle {
+  margin-top: 1rem;
+  padding: 1.1rem;
+  border-radius: 14px;
+  border: 1px dashed #b7d3c4;
+  background: #f6fbf8;
+  display: grid;
+  gap: 1.1rem;
+  animation: aparecerSuave 0.35s ease both;
+}
+@media (min-width: 700px) { .pago-detalle { grid-template-columns: 300px 1fr; align-items: center; } .pago-detalle .pago-nota { grid-column: 1 / -1; } }
+
+.tarjeta-vista {
+  position: relative;
+  aspect-ratio: 1.58;
+  max-width: 300px;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #0a2e1d 0%, #0f766e 60%, #34d399 120%);
+  box-shadow: 0 14px 28px rgba(10, 46, 29, 0.3);
+  overflow: hidden;
+  animation: tilt 5s ease-in-out infinite;
+}
+.tarjeta-vista::after {
+  content: "";
+  position: absolute;
+  width: 180px; height: 180px;
+  top: -70px; right: -60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+.tarjeta-vista .chip { width: 38px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #fde68a, #f59e0b); }
+.tv-num { font-family: var(--font-mono); font-size: 1.15rem; letter-spacing: 0.08em; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+.tv-pie { display: flex; justify-content: space-between; font-size: 0.72rem; letter-spacing: 0.05em; gap: 0.5rem; }
+.tv-pie span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+
+.pago-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 0 0.8rem; }
+.pago-campos .form-group { margin-bottom: 0.7rem; }
+.pago-nota { margin: 0; font-size: 0.8rem; color: var(--texto-secundario); }
+
+
+.pago-app { --c: #742284; }
+.pago-app-plin { --c: #0891b2; }
+.pago-qr { display: grid; justify-items: center; gap: 0.4rem; }
+.qr-demo {
+  width: 150px; height: 150px;
+  padding: 10px;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--c);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--c) 28%, transparent);
+  border: 2px solid color-mix(in srgb, var(--c) 40%, #fff);
+  animation: latido 3s ease-in-out infinite;
+}
+.pago-qr small { color: var(--texto-secundario); font-size: 0.74rem; }
+.pago-pasos ol { margin: 0 0 0.9rem; padding-left: 1.2rem; display: grid; gap: 0.35rem; color: var(--texto-principal); }
+
+
+/* Botón de pagar */
+.btn-pagar { width: 100%; margin-top: 1.2rem; padding: 0.85rem 1.25rem; font-size: 1.02rem; }
+.spinner {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  animation: girarSpinner 0.7s linear infinite;
+}
+
+
+/* Etiqueta de método en la tabla */
+.badge-metodo {
+  --c: #0f766e;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem 0.2rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 12%, #fff);
+}
+.badge-metodo.pago-yape { --c: #742284; }
+.badge-metodo.pago-plin { --c: #0891b2; }
+.pago-ico-mini { width: 16px; height: 16px; display: inline-block; }
+.pago-ico-mini svg { width: 100%; height: 100%; display: block; }
+.ref-pago { display: block; margin-top: 2px; color: var(--texto-secundario); font-size: 0.72rem; font-family: var(--font-mono); }
+
+
+/* Aviso para administradores */
+.aviso-bloqueado {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-top-color: #f59e0b !important;
+  background: linear-gradient(135deg, #fffbeb, #fff) !important;
+}
+.candado {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  font-size: 1.6rem;
+  background: #fef3c7;
+  animation: floatSlow 3s ease-in-out infinite;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta-vista, .qr-demo, .candado, .pago-detalle { animation: none !important; }
+}
+.table td.nw { white-space: nowrap; }
