@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { apiFetch, API_URL } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import BadgeEstado from '../../components/common/BadgeEstado.jsx';
+import PanelHero, { EstadoVacio } from '../../components/common/PanelHero.jsx';
 import SubirImagenNeon from '../../components/common/SubirImagenNeon.jsx';
+
 
 export default function AguaPanel() {
   const { obtenerRol } = useAuth();
   const rol = obtenerRol('agua');
+
 
   const [fugas, setFugas] = useState([]);
   const [ubicacion, setUbicacion] = useState('');
@@ -15,6 +18,7 @@ export default function AguaPanel() {
   const [imagenId, setImagenId] = useState(null);
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
+
 
   const cargar = async () => {
     try {
@@ -25,9 +29,11 @@ export default function AguaPanel() {
     }
   };
 
+
   useEffect(() => {
     cargar();
   }, []);
+
 
   const handleCrear = async (e) => {
     e.preventDefault();
@@ -47,6 +53,7 @@ export default function AguaPanel() {
     }
   };
 
+
   const cambiarEstado = async (id, estado) => {
     try {
       await apiFetch(`/api/agua/${id}/estado`, {
@@ -59,6 +66,7 @@ export default function AguaPanel() {
     }
   };
 
+
   const eliminar = async (id) => {
     try {
       await apiFetch(`/api/agua/${id}`, { method: 'DELETE' });
@@ -68,17 +76,25 @@ export default function AguaPanel() {
     }
   };
 
+
   return (
     <div>
-      <div className="card">
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#16a34a', fontWeight: 700 }}>
-          MÓDULO AGUAVIVA HUANCAYO · ROL ACTIVO: {rol?.toUpperCase()}
-        </p>
-        <h1 style={{ margin: '0.2rem 0 0', color: '#0f3d24' }}>Reportes de Fuga de Agua</h1>
-      </div>
+      <PanelHero
+        modulo="agua"
+        rol={rol}
+        titulo="Reportes de Fuga de Agua"
+        subtitulo="Reporta fugas en tu zona de Huancayo y haz seguimiento hasta que sean atendidas."
+        stats={[
+          { label: 'Reportes', valor: fugas.length },
+          { label: 'Pendientes', valor: fugas.filter((f) => f.estado === 'registrado').length },
+          { label: 'Atendidos', valor: fugas.filter((f) => f.estado === 'atendido').length },
+        ]}
+      />
+
 
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-error">{error}</div>}
+
 
       {(rol === 'cliente' || rol === 'administrador') && (
         <form onSubmit={handleCrear} className="card">
@@ -116,6 +132,7 @@ export default function AguaPanel() {
           <button type="submit" className="btn btn-primary">Enviar reporte</button>
         </form>
       )}
+
 
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Panel de reportes ({fugas.length})</h2>
@@ -161,6 +178,9 @@ export default function AguaPanel() {
                   )}
                 </tr>
               ))}
+              {fugas.length === 0 && (
+                <tr><td colSpan={7}><EstadoVacio texto="Aún no hay reportes de fuga" /></td></tr>
+              )}
             </tbody>
           </table>
         </div>
