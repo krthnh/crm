@@ -1129,3 +1129,26 @@ body {
 .chip-servicio:nth-child(2) { animation-delay: 0.08s; }
 .chip-servicio:nth-child(3) { animation-delay: 0.16s; }
 .chip-servicio:nth-child(4) { animation-delay: 0.24s; }
+
+/* ==========================================================================
+   OPERACIONES CERRADAS: acciones deshabilitadas
+   ========================================================================== */
+.btn:disabled,
+.btn-primary:disabled,
+.btn-danger:disabled {
+  opacity: 0.55;
+  filter: grayscale(1);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.table tbody tr.fila-cerrada td { background: rgba(236, 244, 239, 0.55); }
+.table tbody tr.fila-cerrada td:last-child::before {
+  content: "🔒 Cerrada";
+  display: block;
+  width: 100%;
+  margin-bottom: 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--texto-secundario);
+}
