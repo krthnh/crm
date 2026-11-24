@@ -5,11 +5,9 @@ import BadgeEstado from '../../components/common/BadgeEstado.jsx';
 import PanelHero, { EstadoVacio } from '../../components/common/PanelHero.jsx';
 import SubirImagenNeon from '../../components/common/SubirImagenNeon.jsx';
 
-
 export default function SatPanel() {
   const { obtenerRol } = useAuth();
   const rol = obtenerRol('sat');
-
 
   const [reclamos, setReclamos] = useState([]);
   const [predio, setPredio] = useState('');
@@ -18,7 +16,6 @@ export default function SatPanel() {
   const [imagenId, setImagenId] = useState(null);
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
-
 
   const cargar = async () => {
     try {
@@ -29,11 +26,9 @@ export default function SatPanel() {
     }
   };
 
-
   useEffect(() => {
     cargar();
   }, []);
-
 
   const handleCrear = async (e) => {
     e.preventDefault();
@@ -54,7 +49,6 @@ export default function SatPanel() {
     }
   };
 
-
   const resolver = async (id, estado) => {
     try {
       await apiFetch(`/api/sat/${id}/estado`, {
@@ -67,7 +61,6 @@ export default function SatPanel() {
     }
   };
 
-
   const eliminar = async (id) => {
     try {
       await apiFetch(`/api/sat/${id}`, { method: 'DELETE' });
@@ -76,7 +69,6 @@ export default function SatPanel() {
       setError(err.message);
     }
   };
-
 
   return (
     <div>
@@ -93,10 +85,8 @@ export default function SatPanel() {
         ]}
       />
 
-
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-error">{error}</div>}
-
 
       {(rol === 'cliente' || rol === 'administrador') && (
         <form onSubmit={handleCrear} className="card">
@@ -138,7 +128,6 @@ export default function SatPanel() {
         </form>
       )}
 
-
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Expedientes registrados ({reclamos.length})</h2>
         <div className="table-wrap">
@@ -156,7 +145,7 @@ export default function SatPanel() {
             </thead>
             <tbody>
               {reclamos.map((r) => (
-                <tr key={r.id}>
+                <tr key={r.id} className={['fundado', 'infundado'].includes(r.estado) ? 'fila-cerrada' : undefined}>
                   <td><strong>{r.codigo}</strong></td>
                   <td>{r.contribuyente}</td>
                   <td>{r.predio} · {r.tributo}</td>
@@ -171,14 +160,14 @@ export default function SatPanel() {
                   <td><BadgeEstado estado={r.estado} /></td>
                   {(rol === 'empleado' || rol === 'administrador') && (
                     <td style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                      <button type="button" className="btn btn-primary btn-sm" onClick={() => resolver(r.id, 'fundado')}>
+                      <button type="button" className="btn btn-primary btn-sm" disabled={['fundado', 'infundado'].includes(r.estado)} title={['fundado', 'infundado'].includes(r.estado) ? 'Operación cerrada' : undefined} onClick={() => resolver(r.id, 'fundado')}>
                         Fundado
                       </button>
-                      <button type="button" className="btn btn-danger btn-sm" onClick={() => resolver(r.id, 'infundado')}>
+                      <button type="button" className="btn btn-danger btn-sm" disabled={['fundado', 'infundado'].includes(r.estado)} title={['fundado', 'infundado'].includes(r.estado) ? 'Operación cerrada' : undefined} onClick={() => resolver(r.id, 'infundado')}>
                         Infundado
                       </button>
                       {rol === 'administrador' && (
-                        <button type="button" className="btn btn-danger btn-sm" onClick={() => eliminar(r.id)}>
+                        <button type="button" className="btn btn-danger btn-sm" disabled={['fundado', 'infundado'].includes(r.estado)} title={['fundado', 'infundado'].includes(r.estado) ? 'Operación cerrada' : undefined} onClick={() => eliminar(r.id)}>
                           Eliminar
                         </button>
                       )}
