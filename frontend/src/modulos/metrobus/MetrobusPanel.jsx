@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import BadgeEstado from '../../components/common/BadgeEstado.jsx';
 import PanelHero, { EstadoVacio } from '../../components/common/PanelHero.jsx';
 import SubirImagenNeon from '../../components/common/SubirImagenNeon.jsx';
+import MetodosPago, { BadgeMetodo } from '../../components/common/MetodosPago.jsx';
 
 
 export default function MetrobusPanel() {
@@ -15,6 +16,9 @@ export default function MetrobusPanel() {
   const [numeroTarjeta, setNumeroTarjeta] = useState('');
   const [monto, setMonto] = useState('');
   const [imagenId, setImagenId] = useState(null);
+  const [pago, setPago] = useState({ metodo: 'tarjeta', referencia: '' });
+  const [procesando, setProcesando] = useState(false);
+  const [formKey, setFormKey] = useState(0); // reinicia el formulario de pago tras guardar
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
 
@@ -38,18 +42,40 @@ export default function MetrobusPanel() {
     e.preventDefault();
     setMensaje('');
     setError('');
+
+
+    if (!pago.referencia) {
+      setError(pago.metodo === 'tarjeta'
+        ? 'Complete el número de tarjeta para continuar'
+        : 'Ingrese el número de operación de su pago');
+      return;
+    }
+
+
+    setProcesando(true);
     try {
+      await new Promise((r) => setTimeout(r, 900)); // simulación de "procesando pago"
       const nuevo = await apiFetch('/api/metrobus', {
         method: 'POST',
-        body: JSON.stringify({ numero_tarjeta: numeroTarjeta, monto, imagen_id: imagenId }),
+        body: JSON.stringify({
+          numero_tarjeta: numeroTarjeta,
+          monto,
+          imagen_id: imagenId,
+          metodo_pago: pago.metodo,
+          referencia_pago: pago.referencia,
+        }),
       });
-      setMensaje(`Recarga registrada con código ${nuevo.codigo}`);
+      setMensaje(`¡Pago recibido! Recarga registrada con código ${nuevo.codigo}`);
       setNumeroTarjeta('');
       setMonto('');
       setImagenId(null);
+      setPago({ metodo: 'tarjeta', referencia: '' });
+      setFormKey((k) => k + 1);
       cargar();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setProcesando(false);
     }
   };
 
@@ -97,12 +123,15 @@ export default function MetrobusPanel() {
       {error && <div className="alert alert-error">{error}</div>}
 
 
-      {(rol === 'cliente' || rol === 'administrador') && (
-        <form onSubmit={handleCrear} className="card">
-          <h2 style={{ marginTop: 0 }}>Registrar nueva recarga</h2>
+      {rol === 'cliente' && (
+        <form onSubmit={handleCrear} className="card recarga-form" key={formKey}>
+          <h2 style={{ marginTop: 0 }}>Recargar mi tarjeta</h2>
+
+
+          <div className="paso-titulo"><span>1</span> Datos de la recarga</div>
           <div className="grid-2">
             <div className="form-group">
-              <label htmlFor="mb-tarjeta">Número de tarjeta</label>
+              <label htmlFor="mb-tarjeta">Número de tarjeta MetroBus</label>
               <input
                 id="mb-tarjeta"
                 className="form-control"
@@ -125,11 +154,43 @@ export default function MetrobusPanel() {
                 onChange={(e) => setMonto(e.target.value)}
                 required
               />
+              <div className="montos-rapidos">
+                {[10, 20, 30, 50].map((m) => (
+                  <button type="button" key={m} className={Number(monto) === m ? 'activo' : ''} onClick={() => setMonto(String(m))}>
+                    S/ {m}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
+
+
+          <div className="paso-titulo"><span>2</span> Método de pago</div>
+          <MetodosPago metodo={pago.metodo} onChange={setPago} />
+
+
+          <div className="paso-titulo"><span>3</span> Comprobante</div>
           <SubirImagenNeon onImagenSubida={setImagenId} imagenActualId={imagenId} />
-          <button type="submit" className="btn btn-primary">Guardar recarga</button>
+
+
+          <button type="submit" className="btn btn-primary btn-pagar" disabled={procesando}>
+            {procesando ? (<><span className="spinner" /> Procesando pago...</>) : (<>Pagar S/ {Number(monto || 0).toFixed(2)}</>)}
+          </button>
         </form>
+      )}
+
+
+      {rol === 'administrador' && (
+        <div className="card aviso-bloqueado">
+          <span className="candado">🔒</span>
+          <div>
+            <h2 style={{ margin: 0 }}>Pagos de recarga solo para clientes</h2>
+            <p style={{ margin: '0.25rem 0 0', color: 'var(--texto-secundario)' }}>
+              Los métodos de pago (tarjeta, Yape y Plin) están habilitados únicamente para clientes.
+              Como administrador puedes validar los pagos y gestionar el listado.
+            </p>
+          </div>
+        </div>
       )}
 
 
@@ -143,6 +204,7 @@ export default function MetrobusPanel() {
                 <th>Usuario</th>
                 <th>Tarjeta</th>
                 <th>Monto</th>
+                <th>Método</th>
                 <th>Evidencia</th>
                 <th>Estado</th>
                 {(rol === 'empleado' || rol === 'administrador') && <th>Acciones</th>}
@@ -151,10 +213,11 @@ export default function MetrobusPanel() {
             <tbody>
               {registros.map((r) => (
                 <tr key={r.id}>
-                  <td><strong>{r.codigo}</strong></td>
+                  <td className="nw"><strong>{r.codigo}</strong></td>
                   <td>{r.usuario_nombre}</td>
-                  <td>{r.numero_tarjeta}</td>
-                  <td>S/ {Number(r.monto).toFixed(2)}</td>
+                  <td className="nw">{r.numero_tarjeta}</td>
+                  <td className="nw">S/ {Number(r.monto).toFixed(2)}</td>
+                  <td><BadgeMetodo metodo={r.metodo_pago} />{r.referencia_pago && <small className="ref-pago">{r.referencia_pago}</small>}</td>
                   <td>
                     {r.imagen_id ? (
                       <a href={`${API_URL}/api/imagenes/${r.imagen_id}`} target="_blank" rel="noreferrer">
@@ -178,7 +241,7 @@ export default function MetrobusPanel() {
                 </tr>
               ))}
               {registros.length === 0 && (
-                <tr><td colSpan={7}><EstadoVacio texto="Aún no hay recargas registradas" /></td></tr>
+                <tr><td colSpan={8}><EstadoVacio texto="Aún no hay recargas registradas" /></td></tr>
               )}
             </tbody>
           </table>
