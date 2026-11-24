@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { apiFetch, API_URL } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import BadgeEstado from '../../components/common/BadgeEstado.jsx';
+import PanelHero, { EstadoVacio } from '../../components/common/PanelHero.jsx';
 import SubirImagenNeon from '../../components/common/SubirImagenNeon.jsx';
+
 
 export default function SatPanel() {
   const { obtenerRol } = useAuth();
   const rol = obtenerRol('sat');
+
 
   const [reclamos, setReclamos] = useState([]);
   const [predio, setPredio] = useState('');
@@ -15,6 +18,7 @@ export default function SatPanel() {
   const [imagenId, setImagenId] = useState(null);
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
+
 
   const cargar = async () => {
     try {
@@ -25,9 +29,11 @@ export default function SatPanel() {
     }
   };
 
+
   useEffect(() => {
     cargar();
   }, []);
+
 
   const handleCrear = async (e) => {
     e.preventDefault();
@@ -48,6 +54,7 @@ export default function SatPanel() {
     }
   };
 
+
   const resolver = async (id, estado) => {
     try {
       await apiFetch(`/api/sat/${id}/estado`, {
@@ -60,6 +67,7 @@ export default function SatPanel() {
     }
   };
 
+
   const eliminar = async (id) => {
     try {
       await apiFetch(`/api/sat/${id}`, { method: 'DELETE' });
@@ -69,17 +77,26 @@ export default function SatPanel() {
     }
   };
 
+
   return (
     <div>
-      <div className="card">
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#16a34a', fontWeight: 700 }}>
-          MÓDULO SAT PERÚ · ROL ACTIVO: {rol?.toUpperCase()}
-        </p>
-        <h1 style={{ margin: '0.2rem 0 0', color: '#0f3d24' }}>Reclamos Tributarios</h1>
-      </div>
+      <PanelHero
+        modulo="sat"
+        rol={rol}
+        titulo="Reclamos Tributarios"
+        subtitulo="Presenta reclamos de arbitrios y tributos con tu sustento y consulta la resolución."
+        stats={[
+          { label: 'Expedientes', valor: reclamos.length },
+          { label: 'En trámite', valor: reclamos.filter((r) => !['fundado', 'infundado'].includes(r.estado)).length },
+          { label: 'Fundados', valor: reclamos.filter((r) => r.estado === 'fundado').length },
+          { label: 'Infundados', valor: reclamos.filter((r) => r.estado === 'infundado').length },
+        ]}
+      />
+
 
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-error">{error}</div>}
+
 
       {(rol === 'cliente' || rol === 'administrador') && (
         <form onSubmit={handleCrear} className="card">
@@ -120,6 +137,7 @@ export default function SatPanel() {
           <button type="submit" className="btn btn-primary">Registrar reclamo</button>
         </form>
       )}
+
 
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Expedientes registrados ({reclamos.length})</h2>
@@ -168,6 +186,9 @@ export default function SatPanel() {
                   )}
                 </tr>
               ))}
+              {reclamos.length === 0 && (
+                <tr><td colSpan={7}><EstadoVacio texto="Aún no hay expedientes registrados" /></td></tr>
+              )}
             </tbody>
           </table>
         </div>
