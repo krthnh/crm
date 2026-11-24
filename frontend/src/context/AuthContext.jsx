@@ -33,10 +33,10 @@ export function AuthProvider({ children }) {
   };
 
 
-  const registrar = async ({ nombre, correo, contrasena, modulo }) => {
+  const registrar = async ({ nombre, correo, contrasena }) => {
     const data = await apiFetch('/api/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ nombre, correo, contrasena, modulo }),
+      body: JSON.stringify({ nombre, correo, contrasena }),
     });
 
 
